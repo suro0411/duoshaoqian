@@ -21,10 +21,7 @@ import {
 
 import { initializeApp } from 'firebase/app';
 import { 
-  getAuth, 
-  signInAnonymously, 
-  onAuthStateChanged, 
-  signInWithCustomToken 
+  getAuth 
 } from 'firebase/auth';
 import { 
   getFirestore, 
