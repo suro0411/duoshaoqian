@@ -49,7 +49,6 @@ let app: any;
 
 if (Object.keys(firebaseConfig).length > 0) {
   app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
   db = getFirestore(app);
 }
 
@@ -258,7 +257,7 @@ export default function App() {
   const [gameState, setGameState] = useState<GameState>('title');
   const [region, setRegion] = useState<Region>(null);
   const [gameMode, setGameMode] = useState<GameMode>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [user] = useState<User | null>(null);
   const [targetAmount, setTargetAmount] = useState<number>(0);
   const [currentTray, setCurrentTray] = useState<number[]>([]);
   const [score, setScore] = useState<number>(0);
