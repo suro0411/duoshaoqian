@@ -1,23 +1,24 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { 
-  Play, 
-  Volume2, 
-  RotateCcw, 
-  Home, 
-  Info, 
-  Trophy, 
-  CheckCircle, 
-  XCircle, 
-  Wallet, 
-  ArrowRight, 
-  Coins, 
-  MapPin, 
-  Globe, 
-  Coffee, 
-  Star, 
-  Heart, 
-  ClipboardList 
-} from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo } from "react";
+
+import type { User } from "firebase/auth";
+
+
+import type { QuerySnapshot, DocumentData } from "firebase/firestore";
+
+
+
+import {
+  Volume2,
+  Trophy,
+  Info,
+  Home,
+  MapPin,
+  ArrowRight,
+  CheckCircle,
+  XCircle,
+  Heart,
+} from "lucide-react";
+
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
@@ -260,7 +261,7 @@ export default function App() {
   const [gameState, setGameState] = useState<GameState>('title');
   const [region, setRegion] = useState<Region>(null);
   const [gameMode, setGameMode] = useState<GameMode>(null);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [targetAmount, setTargetAmount] = useState<number>(0);
   const [currentTray, setCurrentTray] = useState<number[]>([]);
   const [score, setScore] = useState<number>(0);
@@ -273,40 +274,38 @@ export default function App() {
   const [isSubmittingScore, setIsSubmittingScore] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  // Auth & Init
   useEffect(() => {
-    if (!auth) return;
-    const initAuth = async () => {
-      const customToken = (window as any).__initial_auth_token;
-      if (typeof customToken !== 'undefined' && customToken) {
-        await signInWithCustomToken(auth, customToken);
-      } else {
-        await signInAnonymously(auth);
-      }
-    };
-    initAuth();
-    const unsubscribe = onAuthStateChanged(auth, setUser);
-    return () => unsubscribe();
-  }, []);
+  if (!db || !user) return;
+
+  const q = query(
+    collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard'),
+    orderBy('score', 'desc'),
+    limit(20)
+  );
+
+  const unsubscribe = onSnapshot(
+    q,
+    (snapshot: QuerySnapshot<DocumentData>) => {
+      const list = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setLeaderboard(list);
+    }
+  );
+
+  return () => {
+    unsubscribe();
+  };
+}, [db, user]);
+
 
   // Leaderboard listener
-  useEffect(() => {
-    if (!db || !user) return;
-    const q = query(
-      collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard'),
-      orderBy('score', 'desc'),
-      limit(20)
-    );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setLeaderboard(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    }, (err) => console.error(err));
-    return () => unsubscribe();
-  }, [user]);
 
-  useEffect(() => {
+ 
     const savedName = localStorage.getItem('playerName');
     if (savedName) setPlayerName(savedName);
-  }, []);
+  
 
   const speakAmount = useCallback((amount: number) => {
     if (!window.speechSynthesis || !region) return;
@@ -410,7 +409,7 @@ export default function App() {
         name: playerName.trim(),
         score: score,
         region: region,
-        uid: user.uid,
+        uid: user?.uid,
         createdAt: serverTimestamp()
       });
       setHasSubmitted(true);
@@ -673,4 +672,4 @@ export default function App() {
       {gameState === 'info' && renderInfo()}
     </div>
   );
-}
+}  
