@@ -21,9 +21,6 @@ import {
 
 import { initializeApp } from 'firebase/app';
 import { 
-  getAuth 
-} from 'firebase/auth';
-import { 
   getFirestore, 
   collection, 
   addDoc, 
@@ -44,7 +41,6 @@ const appId = typeof (window as any).__app_id !== 'undefined'
   : 'default-app-id';
 
 let db: any;
-let auth: any;
 let app: any;
 
 if (Object.keys(firebaseConfig).length > 0) {
