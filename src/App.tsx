@@ -656,6 +656,14 @@ export default function App() {
   return (
     <div className="w-full h-screen max-w-md mx-auto bg-sky-50 shadow-2xl overflow-hidden font-sans text-slate-800 flex flex-col relative border-x border-slate-200">
       {gameState === 'title' && renderTitle()}
+
+      {gameState === 'title' && (
+  <p className="absolute bottom-3 left-0 right-0 text-xs text-gray-500 text-center px-4">
+    ※LINEなどのアプリ内ブラウザでは音声が再生されない場合があります。<br />
+    音が出ない場合は、Chrome や Safari などのブラウザで開いてください。
+  </p>
+)}
+
       {gameState === 'regionSelect' && renderRegionSelect()}
       {gameState === 'modeSelect' && renderModeSelect()}
       {gameState === 'ranking' && renderRanking()}
