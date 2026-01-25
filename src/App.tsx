@@ -17,6 +17,7 @@ import {
   CheckCircle,
   XCircle,
   Heart,
+  Skull, 
 } from "lucide-react";
 
 import { initializeApp } from 'firebase/app';
@@ -50,7 +51,7 @@ if (Object.keys(firebaseConfig).length > 0) {
 
 // --- Types & Constants ---
 
-type GameMode = 'survival' | 'challenge' | null;
+type GameMode = 'survival' | 'challenge' | 'oni' | null;
 type Region = 'china' | 'taiwan' | null;
 type GameState = 'title' | 'regionSelect' | 'modeSelect' | 'playing' | 'result' | 'info' | 'ranking';
 
@@ -267,6 +268,13 @@ export default function App() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
   useEffect(() => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.getVoices();
+    };
+  }, []);
+
+  useEffect(() => {
   if (!db || !user) return;
 
   const q = query(
@@ -289,33 +297,83 @@ export default function App() {
   return () => {
     unsubscribe();
   };
-}, [db, user]);
+}, [user]);
 
 
   // Leaderboard listener
 
  
-    const savedName = localStorage.getItem('playerName');
-    if (savedName) setPlayerName(savedName);
-  
+  useEffect(() => {
+  const savedName = localStorage.getItem('playerName');
+  if (savedName) setPlayerName(savedName);
+}, []);
 
-  const speakAmount = useCallback((amount: number) => {
-    if (!window.speechSynthesis || !region) return;
-    setIsSpeaking(true);
-    const utterance = new SpeechSynthesisUtterance(`一共是${amount}元`);
-    utterance.lang = REGION_CONFIGS[region].voiceLang;
-    utterance.rate = 0.85;
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-    window.speechSynthesis.cancel();
+function generateOniReading(num: number): string {
+  const units = ['', '十', '百', '千', '万'];
+  const digits = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+
+  let result = '';
+  let str = String(num);
+  let len = str.length;
+
+  for (let i = 0; i < len; i++) {
+    const n = Number(str[i]);
+    const pos = len - i - 1;
+
+    if (n === 0) {
+      // 口語ルール：0は基本読まない（lingを言わない）
+      continue;
+    }
+
+    // 「一十」→「十」にはしない（口語・買い物想定）
+    result += digits[n] + units[pos];
+  }
+
+  return result;
+}
+
+
+
+const speakAmount = useCallback((amount: number) => {
+  if (!window.speechSynthesis || !region) return;
+
+  setIsSpeaking(true);
+
+  let text = '';
+
+  if (gameMode === 'oni') {
+    // 👹 鬼モード：数字だけ読む
+    text = generateOniReading(amount);
+  } else {
+    // 通常モード
+    const unit = region === 'taiwan' ? '块钱' : '元';
+    text = `一共是${amount}${unit}`;
+  }
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = REGION_CONFIGS[region].voiceLang;
+
+  utterance.rate = gameMode === 'oni' ? 1.3 : 1.0;
+  utterance.pitch = gameMode === 'oni' ? 0.8 : 1.0;
+
+  utterance.onend = () => setIsSpeaking(false);
+  utterance.onerror = () => setIsSpeaking(false);
+
+  window.speechSynthesis.cancel();
+
+  // ⭐ 頭切れ防止
+  setTimeout(() => {
     window.speechSynthesis.speak(utterance);
-    // フォールバック
-    setTimeout(() => setIsSpeaking(false), 5000);
-  }, [region]);
+  }, 600);
+
+}, [region, gameMode]);
+
+
 
   const generateAmount = (currentQ: number): number => {
     let min, max;
-    if (gameMode === 'survival') {
+    if (gameMode === 'oni') {min = 1; max = 99999; } 
+    else if (gameMode === 'survival') {
       if (currentQ <= 10) { min = 10; max = 99; }
       else if (currentQ <= 20) { min = 100; max = 999; }
       else if (currentQ <= 30) { min = 1000; max = 9999; }
@@ -356,42 +414,48 @@ export default function App() {
     setCurrentTray(prev => prev.filter((_, i) => i !== index));
   };
 
-  const checkAnswer = () => {
-    if (!region) return;
-    const currentTotal = currentTray.reduce((a, b) => a + b, 0);
-    if (currentTotal === targetAmount) {
-      setFeedback('correct');
-      setScore(prev => prev + 1);
-      setTimeout(() => {
-        if (gameMode === 'challenge' && questionCount >= 10) {
-          setGameState('result');
-        } else if (gameMode === 'survival' && questionCount >= 50) {
-          setGameState('result');
-        } else {
-          const nextQ = questionCount + 1;
-          setQuestionCount(nextQ);
-          generateQuestion(nextQ);
-        }
-      }, 1200);
-    } else {
-      setFeedback('wrong');
-      const diff = currentTotal - targetAmount;
-      setFeedbackMessage(diff > 0 ? `多いです (+${diff})` : `足りません (${diff})`);
-      setTimeout(() => {
-        if (gameMode === 'survival') {
-          setGameState('result');
-        } else {
-          if (questionCount >= 10) {
-            setGameState('result');
-          } else {
-            const nextQ = questionCount + 1;
-            setQuestionCount(nextQ);
-            generateQuestion(nextQ);
-          }
-        }
-      }, 2000);
-    }
-  };
+const checkAnswer = () => {
+  if (!region) return;
+
+  const currentTotal = currentTray.reduce((a, b) => a + b, 0);
+
+  if (currentTotal === targetAmount) {
+    setFeedback('correct');
+    setScore(prev => prev + 1);
+
+    setTimeout(() => {
+      if (gameMode === 'challenge' && questionCount >= 10) {
+        setGameState('result');
+      } else if (gameMode === 'survival' && questionCount >= 50) {
+        setGameState('result');
+      } else {
+        const nextQ = questionCount + 1;
+        setQuestionCount(nextQ);
+        generateQuestion(nextQ);
+      }
+    }, 1200);
+
+  } else {
+    setFeedback('wrong');
+    const diff = currentTotal - targetAmount;
+    setFeedbackMessage(
+      diff > 0 ? `多いです (+${diff})` : `足りません (${diff})`
+    );
+
+    setTimeout(() => {
+      if (gameMode === 'survival' || gameMode === 'oni') {
+        setGameState('result');
+      } else if (questionCount >= 10) {
+        setGameState('result');
+      } else {
+        const nextQ = questionCount + 1;
+        setQuestionCount(nextQ);
+        generateQuestion(nextQ);
+      }
+    }, 2000);
+  }
+};
+
 
   const submitScore = async () => {
     if (!db || !user || !playerName.trim()) return;
@@ -425,8 +489,8 @@ export default function App() {
     if (!region) return [];
     const config = REGION_CONFIGS[region];
     const base = config.denominations;
-    const extra = gameMode === 'survival' ? config.survivalExtra : [];
-    return Array.from(new Set([...base, ...extra]));
+    const extra = gameMode === 'survival' || gameMode === 'oni' ? config.survivalExtra : [];
+    return Array.from(new Set([...base, ...extra])).sort((a, b) => a - b);
   }, [region, gameMode]);
 
   // Views
@@ -485,6 +549,11 @@ export default function App() {
         <CheckCircle size={48} /><span className="text-2xl font-bold">10問チャレンジ</span>
         <span className="text-xs opacity-80 text-center font-bold">ミスしても最後まで練習</span>
       </button>
+      <button onClick={() => startMode('oni')} className="z-10 flex-1 bg-gradient-to-br from-red-500 to-red-700 text-white rounded-2xl p-6 shadow-lg flex flex-col items-center justify-center gap-2 active:scale-95 border-4 border-red-300">
+        <Skull size={48} />
+        <span className="text-2xl font-bold">鬼モード</span>
+        <span className="text-xs opacity-80 text-center font-bold">桁数ランダム、音声早め</span>
+      </button>
     </div>
   );
 
@@ -501,7 +570,7 @@ export default function App() {
           <div className="text-center">
             <div className="text-[10px] font-bold opacity-70 leading-none">{config.name}</div>
             <div className="text-lg font-black text-sky-600 leading-tight">
-              {gameMode === 'survival' ? `${questionCount}/50 問目` : `${questionCount}/10 問目`}
+                {gameMode === 'survival' && `${questionCount}/50 問目`}{gameMode === 'challenge' && `${questionCount}/10 問目`}{gameMode === 'oni' && `鬼モード`}
             </div>
           </div>
           <div className="w-8"></div>
@@ -601,25 +670,29 @@ export default function App() {
     );
   };
 
-  const renderRanking = () => (
-    <div className="flex flex-col h-full overflow-hidden relative">
-      <DrinkStandBackground />
-      <div className="p-4 bg-white/80 backdrop-blur-md shadow-sm flex items-center gap-2 shrink-0 border-b-2 border-sky-100 z-10">
-        <button onClick={() => setGameState('title')} className="p-1 text-sky-600"><ArrowRight className="rotate-180"/></button>
-        <h2 className="text-xl font-black text-sky-900">ランキング</h2>
-      </div>
-      <div className="flex-grow overflow-y-auto p-4 space-y-3 z-10">
-        {leaderboard.length === 0 ? <div className="text-center text-slate-400 py-20 font-bold italic bg-white/40 rounded-3xl">データを読み込み中...</div> : 
-          leaderboard.map((entry, idx) => (
-          <div key={`rank-${idx}`} className="flex items-center p-3 bg-white/95 backdrop-blur-sm rounded-2xl shadow-sm border-2 border-sky-50 transition-all hover:scale-[1.02]">
-            <div className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-black mr-3 ${idx === 0 ? 'bg-yellow-400 text-yellow-900 shadow-md ring-2 ring-yellow-200' : idx === 1 ? 'bg-slate-200 text-slate-600' : idx === 2 ? 'bg-orange-100 text-orange-700' : 'bg-sky-50 text-sky-400'}`}>{idx + 1}</div>
-            <div className="flex-1 font-black text-slate-700 text-sm truncate">{entry.name}</div>
-            <div className="text-xl font-black text-sky-600 tabular-nums">{entry.score}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+const renderRanking = () => (
+  <div className="flex flex-col h-full items-center justify-center p-6 text-center bg-sky-50">
+    <h2 className="text-2xl font-black text-sky-900 mb-4">
+      ランキング
+    </h2>
+
+    <p className="text-slate-500 font-bold mb-2">
+      🚧 現在準備中です
+    </p>
+
+    <p className="text-xs text-slate-400 mb-6">
+      鬼モード完成後に実装予定
+    </p>
+
+    <button
+      onClick={() => setGameState('title')}
+      className="px-6 py-3 bg-sky-500 text-white rounded-2xl font-black shadow-lg active:scale-95"
+    >
+      タイトルへ戻る
+    </button>
+  </div>
+);
+
 
   const renderInfo = () => (
     <div className="flex flex-col h-full p-6 overflow-hidden relative">
@@ -659,8 +732,9 @@ export default function App() {
 
       {gameState === 'title' && (
   <p className="absolute bottom-3 left-0 right-0 text-xs text-gray-500 text-center px-4">
-    ※LINEなどのアプリ内ブラウザでは音声が再生されない場合があります。<br />
-    音が出ない場合は、Chrome や Safari などのブラウザで開いてください。
+    ※ 音が出ない場合は、Chrome や Safari などのブラウザで開いてください<br />
+    ※iPhoneで中国語が他言語で流れる場合<br />
+    「言語と地域」や「Siri」の設定に中国語を追加してください<br />
   </p>
 )}
 
