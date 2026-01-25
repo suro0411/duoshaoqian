@@ -262,10 +262,8 @@ export default function App() {
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string>('');
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [playerName, setPlayerName] = useState('');
-  const [isSubmittingScore, setIsSubmittingScore] = useState(false);
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+
 
   useEffect(() => {
     if (!window.speechSynthesis) return;
