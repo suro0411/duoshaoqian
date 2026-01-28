@@ -368,20 +368,34 @@ const speakAmount = useCallback((amount: number) => {
       min = 10; max = 50000;
     }
 
-  } else if (gameMode === 'challenge') {
-    if (currentQ <= 5) {
-    min = 10; max = 99;
-  } else {
-    min = 100; max = 999;
-  }
-  } else {
-    // 保険（基本ここには来ない）
+  let min: number;
+let max: number;
+
+if (gameMode === 'challenge') {
+  if (currentQ <= 5) {
+    // 1〜5問目：2桁
     min = 10;
     max = 99;
+  } else {
+    // 6〜10問目：3桁
+    min = 100;
+    max = 999;
   }
+} else {
+  // 通常モード・保険
+  min = 10;
+  max = 99;
+}
 
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
+console.log({
+    gameMode,
+    currentQ,
+    min,
+    max,
+  });
+
+return Math.floor(Math.random() * (max - min + 1)) + min;
+
 
 
   const generateQuestion = (nextQCount: number) => {
