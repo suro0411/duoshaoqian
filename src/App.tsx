@@ -608,7 +608,8 @@ const checkAnswer = () => {
 
 
   return (
-    <div className="w-full h-screen max-w-md mx-auto bg-sky-50 shadow-2xl overflow-hidden font-sans text-slate-800 flex flex-col relative border-x border-slate-200">
+    <div className="w-full min-h-[100dvh] max-w-md mx-auto bg-sky-50 shadow-2xl overflow-hidden font-sans text-slate-800 flex flex-col relative border-x border-slate-200">
+
       {gameState === 'title' && renderTitle()}
 
       {gameState === 'title' && (
