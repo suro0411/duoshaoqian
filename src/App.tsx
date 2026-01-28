@@ -353,11 +353,11 @@ const speakAmount = useCallback((amount: number) => {
     }
 
   } else if (gameMode === 'challenge') {
-    if (currentQ <= 3) {
-      min = 10; max = 99;
-    } else {
-      min = 100; max = 999; // 最後まで3桁
-    }
+    if (currentQ <= 5) {
+    min = 10; max = 99;
+  } else {
+    min = 100; max = 999;
+  }
   } else {
     // 保険（基本ここには来ない）
     min = 10;
@@ -537,11 +537,10 @@ const checkAnswer = () => {
           <div className="w-8"></div>
         </div>
 
-        <div className="flex-1 flex flex-col items-center justify-start z-10 p-2 min-h-0 relative overflow-hidden">
-          <div className="mt-10 mb-6">
+        <div className="flex flex-col items-center justify-center z-10 p-2 h-[32dvh] relative shrink-0">
           <div className="text-xs text-sky-700 font-bold mb-4 bg-white/60 px-3 py-1 rounded-full border border-sky-200 shadow-sm animate-pulse">店員さんをタップして聞く</div>
           <Shopkeeper speaking={isSpeaking} onClick={() => speakAmount(targetAmount)} />
-          </div>
+        
           
           {feedback && (
             <div className="absolute inset-0 flex items-center justify-center bg-sky-900/40 z-50 p-6 backdrop-blur-sm">
