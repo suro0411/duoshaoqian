@@ -658,10 +658,9 @@ const checkAnswer = () => {
   <p className="absolute bottom-3 left-0 right-0 text-xs text-gray-500 text-center px-4">
     🔊 音声について<br />
     中国語音声を使用します。<br />
-    iPhoneでは、設定から「中国語（普通話／台湾）」の音声をダウンロードしてからご利用ください。<br />
+    iPhoneでは、設定から「中国語（普通話／台湾）」の<br />
+    音声をダウンロードしてからご利用ください。<br />
     ※ Androidは通常そのままご利用いただけます。<br />
-    ※iPhoneで中国語が他言語で流れる場合<br />
-    「言語と地域」や「Siri」の設定に中国語を追加してください<br />
   </p>
 )}
 
