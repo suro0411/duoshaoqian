@@ -538,7 +538,9 @@ const checkAnswer = () => {
           )}
         </div>
 
-        <div className="relative z-20 bg-white rounded-t-[2.5rem] shadow-[0_-8px_20px_-5px_rgba(0,0,0,0.1)] flex flex-col shrink-0 border-t-4 border-sky-200 overflow-hidden">
+        <div className="relative z-20 bg-white rounded-t-[2.5rem] shadow-[0_-8px_20px_-5px_rgba(0,0,0,0.1)]
+        flex flex-col shrink-0 border-t-4 border-sky-200 overflow-hidden
+        max-h-[45dvh]">
           <div className="bg-slate-50 mx-4 mt-3 mb-1 h-16 rounded-xl border-2 border-dashed border-slate-200 relative overflow-hidden flex flex-wrap gap-1.5 p-2 content-start overflow-y-auto">
             {currentTray.map((val, idx) => (
               <Money 
