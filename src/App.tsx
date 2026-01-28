@@ -348,15 +348,14 @@ const speakAmount = useCallback((amount: number) => {
 
 
 
-  const generateAmount = (currentQ: number): number => {
+  const generateAmount = (currentQ: number, mode: GameMode): number => {
   let min: number;
   let max: number;
 
-  if (gameMode === 'oni') {
-    min = 1;
-    max = 99999;
+  if (mode === 'oni') {
+    min = 1; max = 99999;
 
-  } else if (gameMode === 'survival') {
+  } else if (mode === 'survival') {
     if (currentQ <= 10) {
       min = 10; max = 99;
     } else if (currentQ <= 20) {
@@ -369,7 +368,7 @@ const speakAmount = useCallback((amount: number) => {
       min = 10; max = 50000;
     }
 
-  } else if (gameMode === 'challenge') {
+  } else if (mode === 'challenge') {
     if (currentQ <= 5) {
       min = 10; max = 99;
     } else {
@@ -377,32 +376,30 @@ const speakAmount = useCallback((amount: number) => {
     }
 
   } else {
-    // 保険（基本ここには来ない）
-    min = 10;
-    max = 99;
+    min = 10; max = 99;
   }
 
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
 
-
-
-  const generateQuestion = (nextQCount: number) => {
-    const amount = generateAmount(nextQCount);
-    setTargetAmount(amount);
-    setCurrentTray([]);
-    setFeedback(null);
-    setFeedbackMessage('');
+  const generateQuestion = (nextQCount: number, mode: GameMode) => {
+  const amount = generateAmount(nextQCount, mode);
+  setTargetAmount(amount);
+  setCurrentTray([]);
+  setFeedback(null);
+  setFeedbackMessage('');
   };
+
 
   const startMode = (mode: GameMode) => {
-    setGameMode(mode);
-    setScore(0);
-    setQuestionCount(1);
-    setGameState('playing');
-    generateQuestion(1);
+  setGameMode(mode);
+  setScore(0);
+  setQuestionCount(1);
+  setGameState('playing');
+  generateQuestion(1, mode); // ← ここが超重要
   };
+
 
   const addToTray = (amount: number) => {
     if (feedback !== null) return;
