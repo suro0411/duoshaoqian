@@ -161,24 +161,40 @@ const DrinkStandBackground = () => (
 );
 
 const Shopkeeper = ({ speaking, onClick }: { speaking: boolean; onClick: () => void }) => (
-  <button 
-    onClick={onClick}
-    disabled={speaking}
-    className={`relative w-24 h-24 transition-transform duration-200 outline-none ${speaking ? 'scale-110 cursor-default' : 'scale-100 cursor-pointer hover:scale-105 active:scale-95'}`}
-  >
-     <div className="absolute inset-0 bg-orange-100 rounded-full border-4 border-white shadow-lg overflow-hidden z-10">
+  <div className="relative w-24 h-24">
+    {/* 店員さん本体 */}
+    <button 
+      onClick={onClick}
+      disabled={speaking}
+      className={`relative w-24 h-24 transition-transform duration-200 outline-none
+        ${speaking ? 'scale-110 cursor-default' : 'scale-100 cursor-pointer hover:scale-105 active:scale-95'}
+      `}
+    >
+      <div className="absolute inset-0 bg-orange-100 rounded-full border-4 border-white shadow-lg overflow-hidden z-10">
         <div className="absolute top-0 left-0 right-0 h-8 bg-amber-900 rounded-t-full" />
         <div className="absolute top-10 left-6 w-2.5 h-2.5 bg-slate-800 rounded-full" />
         <div className="absolute top-10 right-6 w-2.5 h-2.5 bg-slate-800 rounded-full" />
-        <div className={`absolute top-[64px] left-1/2 -translate-x-1/2 transition-all duration-100 ${speaking ? 'w-4 h-4 border-2 bg-red-400 rounded-full' : 'w-4 h-1.5 border-b-2 border-red-400 rounded-b-full'}`} />
-     </div>
-     {!speaking && (
-       <div className="absolute -top-2 -right-2 bg-sky-500 text-white p-1.5 rounded-full shadow-lg border-2 border-white animate-bounce">
-         <Volume2 size={16} />
-       </div>
-     )}
-  </button>
+        <div
+          className={`absolute top-[64px] left-1/2 -translate-x-1/2 transition-all duration-100
+            ${speaking
+              ? 'w-4 h-4 border-2 bg-red-400 rounded-full'
+              : 'w-4 h-1.5 border-b-2 border-red-400 rounded-b-full'
+            }`}
+        />
+      </div>
+    </button>
+
+    {/* 🔊 音量アイコン（外に逃がす） */}
+    {!speaking && (
+      <div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2
+        bg-sky-500 text-white p-1.5 rounded-full shadow-lg border-2 border-white animate-bounce"
+      >
+        <Volume2 size={16} />
+      </div>
+    )}
+  </div>
 );
+
 
 const Money = ({ value, region, onClick, size = 'md' }: { value: number; region: Region; onClick?: () => void; size?: 'sm' | 'md' | 'lg' }) => {
   const isTaiwan = region === 'taiwan';
