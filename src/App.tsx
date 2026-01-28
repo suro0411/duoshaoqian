@@ -387,12 +387,6 @@ if (gameMode === 'challenge') {
   max = 99;
 }
 
-console.log({
-    gameMode,
-    currentQ,
-    min,
-    max,
-  });
 
 return Math.floor(Math.random() * (max - min + 1)) + min;
 
