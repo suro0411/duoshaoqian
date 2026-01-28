@@ -517,7 +517,7 @@ const checkAnswer = () => {
           <div className="w-8"></div>
         </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center z-10 p-2 min-h-0 relative overflow-hidden">
+        <div className="flex-1 flex flex-col items-center justify-start z-10 p-2 min-h-0 relative overflow-hidden">
           <div className="text-xs text-sky-700 font-bold mb-4 bg-white/60 px-3 py-1 rounded-full border border-sky-200 shadow-sm animate-pulse">店員さんをタップして聞く</div>
           <Shopkeeper speaking={isSpeaking} onClick={() => speakAmount(targetAmount)} />
           
