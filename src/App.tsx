@@ -504,7 +504,7 @@ const checkAnswer = () => {
     const currentSum = currentTray.reduce((a, b) => a + b, 0);
 
     return (
-      <div className="flex flex-col h-full max-h-screen relative overflow-hidden">
+      <div className="flex flex-col flex-1 relative overflow-hidden">
         <DrinkStandBackground />
         <div className="relative z-10 bg-white/60 backdrop-blur-md px-3 py-2 text-sky-900 flex justify-between items-center shadow-sm shrink-0">
           <button onClick={() => setGameState('title')} className="p-1"><Home size={20} /></button>
@@ -539,8 +539,7 @@ const checkAnswer = () => {
         </div>
 
         <div className="relative z-20 bg-white rounded-t-[2.5rem] shadow-[0_-8px_20px_-5px_rgba(0,0,0,0.1)]
-        flex flex-col shrink-0 border-t-4 border-sky-200 overflow-hidden
-        max-h-[45dvh]">
+        flex flex-col shrink-0 border-t-4 border-sky-200 overflow-hidden max-h-[40dvh]">
           <div className="bg-slate-50 mx-4 mt-3 mb-1 h-16 rounded-xl border-2 border-dashed border-slate-200 relative overflow-hidden flex flex-wrap gap-1.5 p-2 content-start overflow-y-auto">
             {currentTray.map((val, idx) => (
               <Money 
