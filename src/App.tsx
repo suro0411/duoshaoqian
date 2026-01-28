@@ -517,12 +517,12 @@ const checkAnswer = () => {
           <div className="w-8"></div>
         </div>
 
-        <div className="flex-grow flex flex-col items-center justify-center z-10 p-2 min-h-0 relative">
+        <div className="flex-1 flex flex-col items-center justify-center z-10 p-2 min-h-0 relative overflow-hidden">
           <div className="text-xs text-sky-700 font-bold mb-4 bg-white/60 px-3 py-1 rounded-full border border-sky-200 shadow-sm animate-pulse">店員さんをタップして聞く</div>
           <Shopkeeper speaking={isSpeaking} onClick={() => speakAmount(targetAmount)} />
           
           {feedback && (
-            <div className="absolute inset-0 flex items-center justify-center bg-sky-900/40 z-50 p-4 backdrop-blur-sm">
+            <div className="absolute inset-0 flex items-center justify-center bg-sky-900/40 z-50 p-6 backdrop-blur-sm">
               <div className="bg-white p-5 rounded-3xl flex flex-col items-center shadow-2xl w-full max-w-xs border-4 border-white animate-in zoom-in duration-200">
                 {feedback === 'correct' ? (
                   <><CheckCircle size={48} className="text-green-500 mb-1"/><span className="text-2xl font-black text-green-600">{config.feedback.correct}</span></>
